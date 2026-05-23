@@ -51,8 +51,11 @@ describe("H. CLI / Web UI smoke", () => {
       expect(res.status).toBe(200);
       const html = await res.text();
       expect(html.toLowerCase()).toContain("agentport");
-      // UI fetches a snapshot endpoint for two-dimensional views
-      expect(html).toMatch(/\/api\/(snapshot|tools)/);
+      // UI loads app.js separately (no longer inline) which is what fetches /api/snapshot
+      expect(html).toContain("/app.js");
+      const jsRes = await fetch(`http://localhost:${port}/app.js`);
+      expect(jsRes.status).toBe(200);
+      expect(await jsRes.text()).toMatch(/\/api\/(snapshot|tools)/);
     } finally {
       await close();
     }

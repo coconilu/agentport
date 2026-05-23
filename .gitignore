@@ -7,9 +7,3 @@ coverage/
 # Playwright artefacts
 test-results/
 playwright-report/
-
-# Competitor repos kept locally for reference only — not part of this project
-vsync/
-harnessbridge/
-agent-switchboard/
-syncode/

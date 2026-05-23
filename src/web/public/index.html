@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>agentport</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header>
+  <h1>agentport</h1>
+  <div class="right">
+    <span class="meta" id="meta">Loading…</span>
+    <button class="refresh" id="refresh" type="button" data-testid="refresh">
+      <span class="refresh-icon">↻</span><span>Refresh</span>
+    </button>
+  </div>
+</header>
+<main>
+  <div class="view-toggle" id="view-toggle">
+    <button data-view="by-tool" data-testid="view-by-tool" class="active">By tool</button>
+    <button data-view="by-type" data-testid="view-by-type">By type</button>
+  </div>
+  <div class="tabs" id="tabs" data-testid="tabs"></div>
+  <div id="content" data-testid="content">Loading…</div>
+</main>
+
+<div class="modal-overlay" id="modal-overlay" data-testid="modal-overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" data-testid="modal">
+    <div class="modal-header">
+      <div class="modal-title-block">
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-badges" id="modal-badges"></div>
+      </div>
+      <button class="modal-close" data-testid="modal-close" type="button" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>

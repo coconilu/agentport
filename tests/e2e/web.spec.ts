@@ -38,20 +38,46 @@ test("E3: switching to by-type changes tabs to type names", async ({ page }) => 
   await expect(page.locator('[data-testid="tab-tool-claude-code"]')).toHaveCount(0);
 });
 
-test("E4: clicking a card expands it to show details", async ({ page }) => {
+test("E4: clicking a card opens modal with detail sections", async ({ page }) => {
   await page.goto(fx.url);
-  // Wait for cards to render in claude-code tool tab
-  const card = page.locator('[data-testid="card-agent:claude-code:code-reviewer"]').first();
+  const card = page.locator('[data-testid="card-agents:claude-code:code-reviewer"]').first();
   await expect(card).toBeVisible();
-  await expect(card).not.toHaveClass(/expanded/);
+  const modal = page.locator('[data-testid="modal"]');
+  await expect(modal).toBeHidden();
   await card.click();
-  await expect(card).toHaveClass(/expanded/);
-  // Expanded view shows the tools list
-  await expect(card.locator(".expandable")).toContainText("Read");
-  await expect(card.locator(".expandable")).toContainText("Grep");
-  // Click again to collapse
+  await expect(modal).toBeVisible();
+  // Modal title shows the agent id
+  await expect(modal.locator(".modal-title")).toHaveText("code-reviewer");
+  // Description section + tools metadata
+  await expect(modal).toContainText("Reviews code carefully");
+  await expect(modal).toContainText("Read, Grep");
+  // Body section preview present
+  await expect(modal.locator('section[data-section="body"]')).toContainText("Body text here");
+});
+
+test("E4b: modal closes on Escape, overlay click, and close button", async ({ page }) => {
+  await page.goto(fx.url);
+  const modal = page.locator('[data-testid="modal"]');
+  const overlay = page.locator('[data-testid="modal-overlay"]');
+  const card = page.locator('[data-testid="card-agents:claude-code:code-reviewer"]').first();
+
+  // Close via Escape
   await card.click();
-  await expect(card).not.toHaveClass(/expanded/);
+  await expect(modal).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(modal).toBeHidden();
+
+  // Close via close button
+  await card.click();
+  await expect(modal).toBeVisible();
+  await page.locator('[data-testid="modal-close"]').click();
+  await expect(modal).toBeHidden();
+
+  // Close via overlay backdrop click
+  await card.click();
+  await expect(modal).toBeVisible();
+  await overlay.click({ position: { x: 10, y: 10 } });
+  await expect(modal).toBeHidden();
 });
 
 test("E5: refresh button re-fetches snapshot and updates meta timestamp", async ({ page }) => {
@@ -67,19 +93,25 @@ test("E5: refresh button re-fetches snapshot and updates meta timestamp", async 
   expect(after).not.toBe(before);
 });
 
-test("E6: MCP card shows transport badge and env count", async ({ page }) => {
+test("E6: MCP card shows transport badge; env count appears in modal", async ({ page }) => {
   await page.goto(fx.url);
-  const card = page.locator('[data-testid="card-mcp:claude-code:filesystem"]');
+  const card = page.locator('[data-testid="card-mcpServers:claude-code:filesystem"]');
   await expect(card).toBeVisible();
   await expect(card.locator(".badge.transport")).toContainText("stdio");
-  await expect(card).toContainText("1 env");
+  await card.click();
+  const modal = page.locator('[data-testid="modal"]');
+  await expect(modal).toContainText("env vars");
+  await expect(modal).toContainText("DEBUG");
 });
 
-test("E7: skill card shows file count + version badge", async ({ page }) => {
+test("E7: skill card slim; version + files shown in modal", async ({ page }) => {
   await page.goto(fx.url);
-  const card = page.locator('[data-testid="card-skill:claude-code:my-skill"]');
+  const card = page.locator('[data-testid="card-skills:claude-code:my-skill"]');
   await expect(card).toBeVisible();
   await expect(card).toContainText("Useful skill");
-  await expect(card).toContainText("file");
-  await expect(card.locator(".badge.transport")).toContainText("v0.1.0");
+  await card.click();
+  const modal = page.locator('[data-testid="modal"]');
+  await expect(modal).toContainText("version");
+  await expect(modal).toContainText("0.1.0");
+  await expect(modal.locator('section[data-section="files"]')).toContainText("SKILL.md");
 });
