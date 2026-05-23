@@ -3,8 +3,23 @@ import { readClaude, writeClaude } from "./adapters/claude.js";
 import { readOpenCode, writeOpenCode } from "./adapters/opencode.js";
 import { readCodex, writeCodex } from "./adapters/codex.js";
 import type { ResolveOptions } from "./adapters/paths.js";
+import { applyHubTags } from "./hub/match.js";
+import { readCachedCatalog } from "./hub/cache.js";
+import type { HubCatalog } from "./hub/types.js";
 
+// Read configs for a tool, then enrich skills with cached hub tags (if available).
+// Hub fetch happens lazily — only the cached catalog is consulted here (no network).
+// Use `agentport hub sync` or call `loadCatalogs({refresh:true})` to refresh.
 export function read(tool: ToolId, opts: ResolveOptions = {}): CanonicalConfig {
+  const cfg = readRaw(tool, opts);
+  const catalogs = loadCachedCatalogs(opts.home);
+  if (catalogs.length > 0) {
+    cfg.skills = applyHubTags(cfg.skills, catalogs);
+  }
+  return cfg;
+}
+
+function readRaw(tool: ToolId, opts: ResolveOptions): CanonicalConfig {
   switch (tool) {
     case "claude-code":
       return readClaude(opts);
@@ -13,6 +28,14 @@ export function read(tool: ToolId, opts: ResolveOptions = {}): CanonicalConfig {
     case "codex":
       return readCodex(opts);
   }
+}
+
+function loadCachedCatalogs(home?: string): HubCatalog[] {
+  const out: HubCatalog[] = [];
+  // Only known builtin hub id for now. When remote hubs are added, enumerate them here.
+  const cat = readCachedCatalog("community", { home, ttlMs: Number.MAX_SAFE_INTEGER });
+  if (cat) out.push(cat);
+  return out;
 }
 
 export function write(

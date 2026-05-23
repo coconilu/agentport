@@ -3,14 +3,17 @@ import { parseArgs } from "node:util";
 import { scan } from "./scan.js";
 import { sync } from "./sync.js";
 import { diffTools, renderDiff } from "./diff.js";
+import { loadCatalogs, BUILTIN_HUBS } from "./hub/index.js";
 import type { ToolId } from "./ir/types.js";
 
-const HELP = `agentport — sync AI coding agent configs
+const HELP = `agentport — port and manage AI coding agent configs
 
 Usage:
   agentport scan                              List detected tools (claude-code / opencode / codex)
-  agentport sync --from <tool> --to <tool>    Migrate config between tools
+  agentport port --from <tool> --to <tool>    Migrate config between tools
   agentport diff --from <tool> --to <tool>    Show MCP-level diff between two tools
+  agentport hub list                          List configured skill hubs and cached state
+  agentport hub sync [--hub <id>]             Refresh hub catalog cache
   agentport --help                            Show this help
 
 Tools: claude-code | opencode | codex
@@ -38,7 +41,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
     return 0;
   }
 
-  if (cmd === "sync" || cmd === "diff") {
+  if (cmd === "port" || cmd === "diff") {
     const { values } = parseArgs({
       args: argv.slice(1),
       options: {
@@ -51,7 +54,7 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
       process.stderr.write(`error: --from and --to must be one of claude-code|opencode|codex\n`);
       return 2;
     }
-    if (cmd === "sync") {
+    if (cmd === "port") {
       const report = sync(values.from, values.to);
       for (const w of report.warnings) process.stderr.write(`warning: ${w.message}\n`);
       for (const f of report.written) process.stdout.write(`wrote ${f}\n`);
@@ -63,7 +66,46 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
     }
   }
 
+  if (cmd === "hub") {
+    return await hubCmd(argv.slice(1));
+  }
+
   process.stderr.write(`unknown command: ${cmd}\n${HELP}`);
+  return 2;
+}
+
+async function hubCmd(args: string[]): Promise<number> {
+  const sub = args[0];
+  if (sub === "list") {
+    const catalogs = await loadCatalogs({ refresh: false });
+    for (const hub of BUILTIN_HUBS) {
+      const cat = catalogs.find((c) => c.hubId === hub.id);
+      const status = cat ? `cached (${cat.entries.length} entries, fetched ${cat.fetchedAt})` : "no cache";
+      process.stdout.write(`${hub.id}\t${hub.name}\t${status}\n`);
+    }
+    return 0;
+  }
+  if (sub === "sync") {
+    const { values } = parseArgs({
+      args: args.slice(1),
+      options: { hub: { type: "string" } },
+      strict: false,
+    });
+    const targetHub = values.hub;
+    const catalogs = await loadCatalogs({ refresh: true });
+    let count = 0;
+    for (const cat of catalogs) {
+      if (targetHub && cat.hubId !== targetHub) continue;
+      process.stdout.write(`refreshed ${cat.hubId}: ${cat.entries.length} entries\n`);
+      count++;
+    }
+    if (targetHub && count === 0) {
+      process.stderr.write(`error: hub '${targetHub}' not found\n`);
+      return 2;
+    }
+    return 0;
+  }
+  process.stderr.write(`unknown hub subcommand: ${sub ?? "(none)"}\nUsage: agentport hub list | agentport hub sync [--hub <id>]\n`);
   return 2;
 }
 

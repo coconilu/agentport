@@ -5,6 +5,7 @@ const TYPE_KEYS = ["mcpServers", "agents", "skills", "hooks", "plugins", "comman
 let snapshot = null;
 let view = "by-tool";
 let activeTab = null;
+let activeTags = new Set();  // skill tag filter (only active in by-type/skills view)
 
 document.querySelectorAll(".view-toggle button").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -102,9 +103,24 @@ function renderToolPane(cfg, toolId) {
 
 function renderTypePane(typeKey) {
   const contentEl = document.getElementById("content");
+
+  // Tag filter only shown on skills view
+  if (typeKey === "skills") {
+    const allSkills = Object.values(snapshot.tools).flatMap(c => c.skills || []);
+    const tagCounts = collectTagCounts(allSkills);
+    if (tagCounts.length > 0) {
+      contentEl.appendChild(renderTagFilter(tagCounts));
+    }
+  } else if (activeTags.size > 0) {
+    activeTags = new Set();  // clear filter when leaving skills
+  }
+
   let any = false;
   for (const [toolId, cfg] of Object.entries(snapshot.tools)) {
-    const items = cfg[typeKey];
+    let items = cfg[typeKey];
+    if (typeKey === "skills" && activeTags.size > 0) {
+      items = (items || []).filter(s => (s.tags || []).some(t => activeTags.has(t)));
+    }
     if (sizeOf(items) === 0) continue;
     any = true;
     contentEl.appendChild(mkGroupHeader(TOOL_LABELS[toolId] || toolId, sizeOf(items)));
@@ -113,9 +129,53 @@ function renderTypePane(typeKey) {
   if (!any) {
     const e = document.createElement("div");
     e.className = "empty";
-    e.textContent = "No " + TYPE_LABELS[typeKey] + " found across any tool.";
+    e.textContent = activeTags.size > 0
+      ? "No " + TYPE_LABELS[typeKey] + " matching the selected tag(s)."
+      : "No " + TYPE_LABELS[typeKey] + " found across any tool.";
     contentEl.appendChild(e);
   }
+}
+
+function collectTagCounts(skills) {
+  const map = new Map();
+  for (const s of skills) {
+    for (const t of (s.tags || [])) map.set(t, (map.get(t) || 0) + 1);
+  }
+  return [...map.entries()]
+    .map(([tag, count]) => ({ tag, count }))
+    .sort((a, b) => b.count - a.count || a.tag.localeCompare(b.tag));
+}
+
+function renderTagFilter(tagCounts) {
+  const bar = document.createElement("div");
+  bar.className = "tag-filter";
+  bar.dataset.testid = "tag-filter";
+  const label = document.createElement("span");
+  label.className = "tf-label";
+  label.textContent = "Filter by tag:";
+  bar.appendChild(label);
+  for (const { tag, count } of tagCounts) {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "tf-chip" + (activeTags.has(tag) ? " active" : "");
+    chip.dataset.testid = "tf-" + tag;
+    chip.innerHTML = escapeHtml(tag) + '<span class="tf-count">' + count + '</span>';
+    chip.addEventListener("click", () => {
+      if (activeTags.has(tag)) activeTags.delete(tag);
+      else activeTags.add(tag);
+      render();
+    });
+    bar.appendChild(chip);
+  }
+  if (activeTags.size > 0) {
+    const clear = document.createElement("button");
+    clear.type = "button";
+    clear.className = "tf-clear";
+    clear.textContent = "Clear filter";
+    clear.addEventListener("click", () => { activeTags.clear(); render(); });
+    bar.appendChild(clear);
+  }
+  return bar;
 }
 
 function mkGroupHeader(label, count) {
@@ -195,6 +255,7 @@ function skillBadges(sk) {
   const out = [{ text: sk.scope, cls: sk.scope }];
   if (sk.plugin) out.push({ text: sk.plugin, cls: "plugin" });
   else if (sk.isSymlink) out.push({ text: "symlink", cls: "symlink" });
+  for (const t of (sk.tags || []).slice(0, 2)) out.push({ text: t, cls: "tag" });
   return out;
 }
 function commandBadges(c) {
@@ -281,6 +342,8 @@ function renderModalBody(typeKey, item) {
     addKv("symlink", item.isSymlink ? "yes" : null);
     addKv("→ target", item.symlinkTarget);
     addKv("file count", item.files.length);
+    if (item.tags && item.tags.length) addKv("tags", item.tags.join(", "));
+    if (item.hubMatch) addKv("hub source", item.hubMatch.hubId + ":" + item.hubMatch.hubEntryId);
     addKv("source", item.source);
   } else if (typeKey === "commands") {
     addKv("argument hint", item.argumentHint);

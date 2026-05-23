@@ -17,7 +17,8 @@ describe("H. CLI / Web UI smoke", () => {
   it("H1: CLI --help exits 0 and includes command names", async () => {
     const { stdout } = await exec(tsxBin, [cliPath, "--help"]);
     expect(stdout).toContain("scan");
-    expect(stdout).toContain("sync");
+    expect(stdout).toContain("port");
+    expect(stdout).toContain("hub");
     expect(stdout).toContain("diff");
   });
 
