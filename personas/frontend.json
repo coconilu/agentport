@@ -1,0 +1,25 @@
+{
+  "id": "frontend",
+  "name": "Frontend Developer",
+  "description": "Web UI development: React/Vue/Svelte, design systems, browser testing.",
+  "version": "0.1.0",
+  "recommendations": {
+    "skills": [
+      { "id": "frontend-design", "rationale": "Production-grade UI generation with non-generic aesthetics" },
+      { "id": "vercel-react-best-practices", "rationale": "Catches React/Next.js perf foot-guns" },
+      { "id": "component-scanner", "rationale": "Inventories existing components to avoid duplication" },
+      { "id": "scan-reviewer", "rationale": "Reviews generated code for reusability against existing UI primitives" }
+    ],
+    "agents": [
+      { "id": "code-reviewer", "rationale": "Catches React anti-patterns and accessibility issues" }
+    ],
+    "mcp": [
+      {
+        "id": "playwright",
+        "rationale": "Browser automation for visual regression + a11y checks",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@playwright/mcp@latest"] }
+      }
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "id": "pm",
+  "name": "Product Manager",
+  "description": "Specs, summaries, stakeholder syncs — less code, more text and decisions.",
+  "version": "0.1.0",
+  "recommendations": {
+    "skills": [
+      { "id": "tech-tutorial-writer", "rationale": "Convert internal docs to readable guides" },
+      { "id": "oss-rebuild-coach", "rationale": "Decompose competitor products into learnable phases" },
+      { "id": "claude-md-improver", "rationale": "Maintain CLAUDE.md / AGENTS.md as living spec" }
+    ],
+    "agents": [
+      { "id": "code-explorer", "rationale": "Read and summarize unfamiliar codebases for product context" }
+    ],
+    "mcp": [
+      {
+        "id": "github",
+        "rationale": "Triage issues, summarize discussions, draft release notes",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-github"] },
+        "env": ["GITHUB_PERSONAL_ACCESS_TOKEN"]
+      }
+    ]
+  }
+}

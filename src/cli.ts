@@ -4,6 +4,7 @@ import { scan } from "./scan.js";
 import { sync } from "./sync.js";
 import { diffTools, renderDiff } from "./diff.js";
 import { loadCatalogs, BUILTIN_HUBS } from "./hub/index.js";
+import { loadPersonas, loadPersona, matchPersona, planInstall, applyInstall } from "./personas/index.js";
 import type { ToolId } from "./ir/types.js";
 
 const HELP = `agentport — port and manage AI coding agent configs
@@ -14,6 +15,10 @@ Usage:
   agentport diff --from <tool> --to <tool>    Show MCP-level diff between two tools
   agentport hub list                          List configured skill hubs and cached state
   agentport hub sync [--hub <id>]             Refresh hub catalog cache
+  agentport persona list                      List built-in role personas
+  agentport persona show <id>                 Show a persona with installed/missing status
+  agentport persona install <id> --target <tool> [--dry-run]
+                                              Install recommendations into <tool>
   agentport --help                            Show this help
 
 Tools: claude-code | opencode | codex
@@ -70,8 +75,108 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
     return await hubCmd(argv.slice(1));
   }
 
+  if (cmd === "persona") {
+    return personaCmd(argv.slice(1));
+  }
+
   process.stderr.write(`unknown command: ${cmd}\n${HELP}`);
   return 2;
+}
+
+function personaCmd(args: string[]): number {
+  const sub = args[0];
+  if (sub === "list") {
+    const personas = loadPersonas();
+    if (personas.length === 0) {
+      process.stderr.write("no personas found\n");
+      return 0;
+    }
+    for (const p of personas) {
+      const counts = countRecs(p);
+      process.stdout.write(
+        `${p.id}\t${p.name}\t(${counts.skills}s/${counts.agents}a/${counts.commands}c/${counts.mcp}m)\n`
+      );
+    }
+    return 0;
+  }
+  if (sub === "show") {
+    const id = args[1];
+    if (!id) {
+      process.stderr.write("usage: agentport persona show <id>\n");
+      return 2;
+    }
+    const persona = loadPersona(id);
+    if (!persona) {
+      process.stderr.write(`persona not found: ${id}\n`);
+      return 2;
+    }
+    const m = matchPersona(persona);
+    process.stdout.write(`${persona.id}  ${persona.name}\n${persona.description}\n\n`);
+    process.stdout.write(`  ${m.totals.installed}/${m.totals.total} installed\n\n`);
+    for (const item of m.items) {
+      const mark = item.status === "installed" ? "✓" : "·";
+      const where = item.installedIn && item.installedIn.length > 0 ? ` (${item.installedIn.join(",")})` : "";
+      process.stdout.write(`  ${mark} ${item.kind.padEnd(8)} ${item.id}${where}\n      ${item.rationale}\n`);
+    }
+    return 0;
+  }
+  if (sub === "install") {
+    const id = args[1];
+    if (!id) {
+      process.stderr.write("usage: agentport persona install <id> --target <tool> [--dry-run]\n");
+      return 2;
+    }
+    const { values } = parseArgs({
+      args: args.slice(2),
+      options: { target: { type: "string" }, "dry-run": { type: "boolean" } },
+      strict: false,
+    });
+    if (!isToolId(values.target)) {
+      process.stderr.write(`error: --target must be one of claude-code|opencode|codex\n`);
+      return 2;
+    }
+    const persona = loadPersona(id);
+    if (!persona) {
+      process.stderr.write(`persona not found: ${id}\n`);
+      return 2;
+    }
+    if (values["dry-run"]) {
+      const plan = planInstall(persona, values.target);
+      printPlan(plan);
+      return 0;
+    }
+    const result = applyInstall(persona, values.target);
+    printPlan(result.plan);
+    for (const f of result.writes) process.stdout.write(`wrote ${f}\n`);
+    return 0;
+  }
+  process.stderr.write(`unknown persona subcommand: ${sub ?? "(none)"}\n`);
+  return 2;
+}
+
+function countRecs(p: { recommendations: Record<string, unknown[] | undefined> }): { skills: number; agents: number; commands: number; mcp: number } {
+  const r = p.recommendations as { skills?: unknown[]; agents?: unknown[]; commands?: unknown[]; mcp?: unknown[] };
+  return {
+    skills: r.skills?.length ?? 0,
+    agents: r.agents?.length ?? 0,
+    commands: r.commands?.length ?? 0,
+    mcp: r.mcp?.length ?? 0,
+  };
+}
+
+function printPlan(plan: { willInstall: Array<{ kind: string; id: string; into: string }>; willSkip: Array<{ kind: string; id: string; reason: string }>; unsupported: Array<{ kind: string; id: string; reason: string }> }): void {
+  if (plan.willInstall.length > 0) {
+    process.stdout.write("will install:\n");
+    for (const w of plan.willInstall) process.stdout.write(`  + ${w.kind} ${w.id} → ${w.into}\n`);
+  }
+  if (plan.willSkip.length > 0) {
+    process.stdout.write("will skip:\n");
+    for (const w of plan.willSkip) process.stdout.write(`  · ${w.kind} ${w.id} — ${w.reason}\n`);
+  }
+  if (plan.unsupported.length > 0) {
+    process.stdout.write("not auto-installable:\n");
+    for (const w of plan.unsupported) process.stdout.write(`  ! ${w.kind} ${w.id} — ${w.reason}\n`);
+  }
 }
 
 async function hubCmd(args: string[]): Promise<number> {

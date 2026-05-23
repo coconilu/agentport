@@ -6,6 +6,9 @@ let snapshot = null;
 let view = "by-tool";
 let activeTab = null;
 let activeTags = new Set();  // skill tag filter (only active in by-type/skills view)
+let personasCache = null;
+let personaDetail = null;  // { id } when viewing detail
+let personaTarget = "claude-code";
 
 document.querySelectorAll(".view-toggle button").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -13,6 +16,7 @@ document.querySelectorAll(".view-toggle button").forEach(btn => {
     btn.classList.add("active");
     view = btn.dataset.view;
     activeTab = null;
+    personaDetail = null;
     render();
   });
 });
@@ -40,6 +44,7 @@ async function load() {
   try {
     const res = await fetch("/api/snapshot?_=" + Date.now());
     snapshot = await res.json();
+    personasCache = null;  // re-fetch on next personas view
     document.getElementById("meta").textContent =
       "Last scan: " + new Date(snapshot.generatedAt).toLocaleTimeString();
     render();
@@ -55,6 +60,11 @@ function render() {
   const contentEl = document.getElementById("content");
   tabsEl.innerHTML = "";
   contentEl.innerHTML = "";
+
+  if (view === "personas") {
+    renderPersonas(contentEl);
+    return;
+  }
 
   if (view === "by-tool") {
     const tools = Object.keys(snapshot.tools);
@@ -426,6 +436,161 @@ function kvList(pairs) {
     dl.appendChild(dd);
   }
   return dl;
+}
+
+/* ===== Personas view ===== */
+async function renderPersonas(contentEl) {
+  if (personaDetail) {
+    await renderPersonaDetail(contentEl, personaDetail.id);
+    return;
+  }
+  contentEl.innerHTML = "Loading personas…";
+  if (!personasCache) {
+    const res = await fetch("/api/personas");
+    personasCache = await res.json();
+  }
+  contentEl.innerHTML = "";
+  if (personasCache.length === 0) {
+    const e = document.createElement("div");
+    e.className = "empty";
+    e.textContent = "No personas configured.";
+    contentEl.appendChild(e);
+    return;
+  }
+  const grid = document.createElement("div");
+  grid.className = "persona-cards";
+  for (const p of personasCache) {
+    const total = p._totals?.total ?? 0;
+    const installed = p._totals?.installed ?? 0;
+    const pct = total > 0 ? Math.round((installed / total) * 100) : 0;
+    const card = document.createElement("div");
+    card.className = "persona-card";
+    card.dataset.testid = "persona-card-" + p.id;
+    card.innerHTML =
+      '<div class="pc-name">' + escapeHtml(p.name) + '</div>' +
+      '<div class="pc-desc">' + escapeHtml(p.description) + '</div>' +
+      '<div class="pc-progress">' +
+        '<div class="pc-pbar"><div class="pc-pfill" style="width: ' + pct + '%"></div></div>' +
+        '<div class="pc-pmeta"><span>' + installed + ' / ' + total + ' installed</span><span>v' + escapeHtml(p.version) + '</span></div>' +
+      '</div>';
+    card.addEventListener("click", () => { personaDetail = { id: p.id }; render(); });
+    grid.appendChild(card);
+  }
+  contentEl.appendChild(grid);
+}
+
+async function renderPersonaDetail(contentEl, id) {
+  contentEl.innerHTML = "Loading…";
+  const res = await fetch("/api/personas/" + encodeURIComponent(id));
+  const m = await res.json();
+  const persona = m.persona;
+  contentEl.innerHTML = "";
+
+  const back = document.createElement("button");
+  back.type = "button";
+  back.className = "pd-back";
+  back.dataset.testid = "persona-back";
+  back.textContent = "← All personas";
+  back.addEventListener("click", () => { personaDetail = null; render(); });
+  contentEl.appendChild(back);
+
+  const wrap = document.createElement("div");
+  wrap.className = "persona-detail";
+  wrap.dataset.testid = "persona-detail";
+
+  const head = document.createElement("div");
+  head.innerHTML =
+    '<h2 style="margin:0 0 0.3rem;">' + escapeHtml(persona.name) + '</h2>' +
+    '<div style="color:var(--muted);font-size:0.9rem;margin-bottom:0.5rem;">' + escapeHtml(persona.description) + '</div>' +
+    '<div style="color:var(--muted);font-size:0.8rem;">' + m.totals.installed + ' / ' + m.totals.total + ' installed · v' + escapeHtml(persona.version) + '</div>';
+  wrap.appendChild(head);
+
+  // Action row: target tool selector + install buttons
+  const actions = document.createElement("div");
+  actions.className = "pd-actions";
+  actions.innerHTML =
+    'Install missing into: ' +
+    '<select id="persona-target" data-testid="persona-target">' +
+      '<option value="claude-code">Claude Code</option>' +
+      '<option value="opencode">OpenCode</option>' +
+      '<option value="codex">Codex</option>' +
+    '</select>' +
+    '<button class="pd-btn" type="button" data-testid="persona-dry-run">Dry-run</button>' +
+    '<button class="pd-btn primary" type="button" data-testid="persona-install">Install</button>';
+  wrap.appendChild(actions);
+
+  const result = document.createElement("div");
+  result.className = "pd-result";
+  result.style.display = "none";
+  result.dataset.testid = "persona-result";
+  wrap.appendChild(result);
+
+  // Group items by kind
+  const kinds = ["skills", "agents", "commands", "mcp"];
+  const KIND_LABELS = { skills: "Skills", agents: "Sub-agents", commands: "Commands", mcp: "MCP servers" };
+  for (const kind of kinds) {
+    const items = m.items.filter((i) => i.kind === kind);
+    if (items.length === 0) continue;
+    const sec = document.createElement("div");
+    sec.className = "pd-section";
+    sec.innerHTML = '<h3>' + KIND_LABELS[kind] + ' (' + items.length + ')</h3>';
+    for (const item of items) {
+      const row = document.createElement("div");
+      row.className = "pd-item" + (item.status === "installed" ? " installed" : "");
+      row.dataset.testid = "persona-item-" + kind + "-" + item.id;
+      const mark = item.status === "installed" ? "✓" : "·";
+      const where = item.installedIn && item.installedIn.length > 0
+        ? '<span class="pd-where"> in ' + escapeHtml(item.installedIn.join(", ")) + '</span>'
+        : "";
+      row.innerHTML =
+        '<span class="pd-mark">' + mark + '</span>' +
+        '<span><span class="pd-id">' + escapeHtml(item.id) + '</span>' + where + '</span>' +
+        '<div class="pd-rationale">' + escapeHtml(item.rationale) + '</div>';
+      sec.appendChild(row);
+    }
+    wrap.appendChild(sec);
+  }
+  contentEl.appendChild(wrap);
+
+  const targetSel = document.getElementById("persona-target");
+  targetSel.value = personaTarget;
+  targetSel.addEventListener("change", () => { personaTarget = targetSel.value; });
+
+  document.querySelector('[data-testid="persona-dry-run"]').addEventListener("click", async () => {
+    const r = await fetch("/api/personas/" + encodeURIComponent(id) + "/plan?target=" + encodeURIComponent(targetSel.value));
+    const data = await r.json();
+    showPlanResult(result, data, false);
+  });
+  document.querySelector('[data-testid="persona-install"]').addEventListener("click", async () => {
+    const r = await fetch("/api/personas/" + encodeURIComponent(id) + "/install?target=" + encodeURIComponent(targetSel.value), { method: "POST" });
+    const data = await r.json();
+    showPlanResult(result, data, true);
+  });
+}
+
+function showPlanResult(el, data, applied) {
+  el.style.display = "block";
+  const plan = data.plan || data;
+  let html = '<div style="font-weight:600;margin-bottom:0.4rem;">' + (applied ? "Install applied" : "Dry-run plan") + '</div>';
+  if (plan.willInstall.length > 0) {
+    html += '<div><strong>Will install:</strong><ul style="margin:0.2rem 0 0.5rem 1.2rem;">';
+    for (const w of plan.willInstall) html += '<li>' + escapeHtml(w.kind) + ' <code>' + escapeHtml(w.id) + '</code> → ' + escapeHtml(w.into) + '</li>';
+    html += '</ul></div>';
+  }
+  if (plan.willSkip.length > 0) {
+    html += '<div><strong>Skip:</strong><ul style="margin:0.2rem 0 0.5rem 1.2rem;color:var(--muted);">';
+    for (const w of plan.willSkip) html += '<li>' + escapeHtml(w.kind) + ' <code>' + escapeHtml(w.id) + '</code> — ' + escapeHtml(w.reason) + '</li>';
+    html += '</ul></div>';
+  }
+  if (plan.unsupported.length > 0) {
+    html += '<div><strong>Not auto-installable:</strong><ul style="margin:0.2rem 0 0 1.2rem;color:var(--warn);">';
+    for (const w of plan.unsupported) html += '<li>' + escapeHtml(w.kind) + ' <code>' + escapeHtml(w.id) + '</code> — ' + escapeHtml(w.reason) + '</li>';
+    html += '</ul></div>';
+  }
+  if (applied && data.writes && data.writes.length > 0) {
+    html += '<div style="margin-top:0.5rem;color:var(--ok);">Wrote: ' + data.writes.map(escapeHtml).join(", ") + '</div>';
+  }
+  el.innerHTML = html;
 }
 
 function sizeOf(x) {

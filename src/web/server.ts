@@ -4,6 +4,7 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { scan } from "../scan.js";
 import { read } from "../sync.js";
+import { loadPersonas, loadPersona, matchPersona, planInstall, applyInstall } from "../personas/index.js";
 import type { ToolId } from "../ir/types.js";
 
 export interface StartOptions {
@@ -97,6 +98,37 @@ export function createServer(opts: StartOptions = {}) {
           };
         }
         return json(res, 200, { tools, generatedAt: new Date().toISOString() });
+      }
+      if (url.pathname === "/api/personas") {
+        const personas = loadPersonas();
+        const out = personas.map((p) => {
+          const m = matchPersona(p, { home: opts.home, cwd: opts.cwd });
+          return { ...p, _totals: m.totals };
+        });
+        return json(res, 200, out);
+      }
+      if (url.pathname.startsWith("/api/personas/")) {
+        const rest = url.pathname.slice("/api/personas/".length);
+        const [id, action] = rest.split("/");
+        const persona = id ? loadPersona(id) : null;
+        if (!persona) return json(res, 404, { error: "persona not found" });
+        if (!action) {
+          const m = matchPersona(persona, { home: opts.home, cwd: opts.cwd });
+          return json(res, 200, m);
+        }
+        if (action === "plan" || action === "install") {
+          const target = url.searchParams.get("target") as ToolId | null;
+          if (!target || !TOOLS.includes(target)) {
+            return json(res, 400, { error: "?target=claude-code|opencode|codex required" });
+          }
+          if (req.method === "POST" && action === "install") {
+            const result = applyInstall(persona, target, { home: opts.home, cwd: opts.cwd });
+            return json(res, 200, result);
+          }
+          const plan = planInstall(persona, target, { home: opts.home, cwd: opts.cwd });
+          return json(res, 200, { plan, target });
+        }
+        return json(res, 404, { error: "unknown persona action" });
       }
       if (url.pathname.startsWith("/api/mcp/")) {
         const tool = url.pathname.slice("/api/mcp/".length) as ToolId;

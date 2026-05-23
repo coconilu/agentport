@@ -1,0 +1,27 @@
+{
+  "id": "backend",
+  "name": "Backend Developer",
+  "description": "Server-side: APIs, databases, services, observability.",
+  "version": "0.1.0",
+  "recommendations": {
+    "skills": [
+      { "id": "claude-api", "rationale": "Building services that call Claude API; covers prompt caching, tool use" },
+      { "id": "review-gen", "rationale": "Reviews generated code against existing modules to avoid duplication" },
+      { "id": "scan-index", "rationale": "Indexes existing exports/utilities before generating new ones" },
+      { "id": "security-review", "rationale": "Backend code is high-risk surface for auth/injection issues" }
+    ],
+    "agents": [
+      { "id": "code-reviewer", "rationale": "API design and error-handling review" },
+      { "id": "code-architect", "rationale": "Service boundaries and data-flow blueprints" }
+    ],
+    "mcp": [
+      {
+        "id": "postgres",
+        "rationale": "Inspect schemas and run safe queries during development",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-postgres"] },
+        "env": ["DATABASE_URL"]
+      }
+    ]
+  }
+}

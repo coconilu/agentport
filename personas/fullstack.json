@@ -1,0 +1,34 @@
+{
+  "id": "fullstack",
+  "name": "Full-stack Developer",
+  "description": "Cross-cutting: UI + API + DB, owning a feature end-to-end.",
+  "version": "0.1.0",
+  "recommendations": {
+    "skills": [
+      { "id": "frontend-design", "rationale": "UI generation for the client side" },
+      { "id": "vercel-react-best-practices", "rationale": "Perf and patterns for SSR/RSC frameworks" },
+      { "id": "claude-api", "rationale": "When the backend itself calls Claude APIs" },
+      { "id": "review-gen", "rationale": "Cross-layer review to keep client + server consistent" },
+      { "id": "scan-index", "rationale": "Reusability across both layers" },
+      { "id": "scan-reviewer", "rationale": "Catches duplicated logic between frontend and backend" }
+    ],
+    "agents": [
+      { "id": "code-reviewer", "rationale": "Full-stack PR review" },
+      { "id": "code-architect", "rationale": "End-to-end feature design" }
+    ],
+    "mcp": [
+      {
+        "id": "playwright",
+        "rationale": "E2E + visual + a11y testing",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@playwright/mcp@latest"] }
+      },
+      {
+        "id": "filesystem",
+        "rationale": "Cross-cutting file access for refactors that touch many layers",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-filesystem"] }
+      }
+    ]
+  }
+}

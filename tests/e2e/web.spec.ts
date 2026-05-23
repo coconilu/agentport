@@ -104,6 +104,30 @@ test("E6: MCP card shows transport badge; env count appears in modal", async ({ 
   await expect(modal).toContainText("DEBUG");
 });
 
+test("E8: personas view lists 5+ persona cards with progress bars", async ({ page }) => {
+  await page.goto(fx.url);
+  await page.locator('[data-testid="view-personas"]').click();
+  // At least the 5 built-in personas should be visible
+  for (const id of ["frontend", "backend", "fullstack", "pm", "qa"]) {
+    await expect(page.locator(`[data-testid="persona-card-${id}"]`)).toBeVisible();
+  }
+});
+
+test("E9: click persona card opens detail; dry-run produces a plan", async ({ page }) => {
+  await page.goto(fx.url);
+  await page.locator('[data-testid="view-personas"]').click();
+  await page.locator('[data-testid="persona-card-frontend"]').click();
+  await expect(page.locator('[data-testid="persona-detail"]')).toBeVisible();
+  // Action row
+  await expect(page.locator('[data-testid="persona-target"]')).toBeVisible();
+  // Dry-run
+  await page.locator('[data-testid="persona-dry-run"]').click();
+  const result = page.locator('[data-testid="persona-result"]');
+  await expect(result).toBeVisible();
+  // Frontend persona's playwright MCP should appear under "Will install"
+  await expect(result).toContainText("playwright");
+});
+
 test("E7: skill card slim; version + files shown in modal", async ({ page }) => {
   await page.goto(fx.url);
   const card = page.locator('[data-testid="card-skills:claude-code:my-skill"]');

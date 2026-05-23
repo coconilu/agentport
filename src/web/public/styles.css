@@ -125,6 +125,57 @@ main { max-width: 1200px; margin: 0 auto; }
 
 .empty { color: var(--mute); font-style: italic; padding: 0.6rem; background: var(--card); border: 1px dashed var(--border); border-radius: 8px; }
 
+/* ===== Personas ===== */
+.persona-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 0.8rem; }
+.persona-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 1rem 1.1rem; cursor: pointer; box-shadow: var(--shadow);
+  transition: border-color 0.15s, transform 0.1s ease, box-shadow 0.15s;
+  display: flex; flex-direction: column; gap: 0.55rem;
+}
+.persona-card:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 10px rgba(37, 99, 235, 0.08); }
+.persona-card .pc-name { font-size: 1.05rem; font-weight: 600; }
+.persona-card .pc-desc { color: var(--fg-soft); font-size: 0.85rem; line-height: 1.45; }
+.persona-card .pc-progress { display: flex; flex-direction: column; gap: 0.35rem; }
+.persona-card .pc-progress .pc-pbar {
+  background: var(--bg); height: 6px; border-radius: 3px; overflow: hidden;
+}
+.persona-card .pc-progress .pc-pfill { background: var(--ok); height: 100%; transition: width 0.3s ease; }
+.persona-card .pc-progress .pc-pmeta { color: var(--muted); font-size: 0.78rem; display: flex; justify-content: space-between; }
+
+.persona-detail .pd-section {
+  margin: 0.8rem 0 1.2rem;
+}
+.persona-detail .pd-section h3 {
+  margin: 0 0 0.5rem; font-size: 0.7rem; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--muted); font-weight: 600;
+}
+.persona-detail .pd-item {
+  display: grid; grid-template-columns: 22px 1fr; gap: 0.4rem 0.6rem;
+  padding: 0.6rem 0.8rem; margin: 0.3rem 0;
+  background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+}
+.persona-detail .pd-item.installed { border-color: #a7f3d0; background: #f0fdf4; }
+.persona-detail .pd-mark { font-weight: 600; color: var(--mute); }
+.persona-detail .pd-item.installed .pd-mark { color: var(--ok); }
+.persona-detail .pd-id { font-family: ui-monospace, monospace; font-weight: 600; }
+.persona-detail .pd-where { color: var(--muted); font-size: 0.8rem; }
+.persona-detail .pd-rationale { grid-column: 2; color: var(--fg-soft); font-size: 0.85rem; line-height: 1.4; }
+.persona-detail .pd-actions { display: flex; gap: 0.5rem; align-items: center; margin: 1rem 0; }
+.persona-detail select, .persona-detail .pd-btn {
+  padding: 0.45rem 0.8rem; font-size: 0.85rem;
+  background: var(--card); border: 1px solid var(--border-strong); border-radius: 6px;
+  color: var(--fg); cursor: pointer;
+}
+.persona-detail .pd-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+.persona-detail .pd-btn.primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.persona-detail .pd-result { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.7rem 0.9rem; margin-top: 1rem; font-size: 0.85rem; }
+.persona-detail .pd-back {
+  background: transparent; border: none; color: var(--muted); cursor: pointer;
+  font-size: 0.85rem; padding: 0; margin-bottom: 0.5rem;
+}
+.persona-detail .pd-back:hover { color: var(--fg); }
+
 /* ===== Modal ===== */
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5);

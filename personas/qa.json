@@ -1,0 +1,29 @@
+{
+  "id": "qa",
+  "name": "QA / Test Engineer",
+  "description": "Test generation, browser/api automation, regression analysis.",
+  "version": "0.1.0",
+  "recommendations": {
+    "skills": [
+      { "id": "scan-reviewer", "rationale": "Audit test coverage gaps against existing helpers" },
+      { "id": "security-review", "rationale": "Security regression checklist" }
+    ],
+    "agents": [
+      { "id": "code-reviewer", "rationale": "Reviews test code for flakiness and false-positive patterns" }
+    ],
+    "mcp": [
+      {
+        "id": "playwright",
+        "rationale": "Primary tool: browser automation for E2E suites",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@playwright/mcp@latest"] }
+      },
+      {
+        "id": "filesystem",
+        "rationale": "Inspect test fixtures, snapshots, logs",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-filesystem"] }
+      }
+    ]
+  }
+}

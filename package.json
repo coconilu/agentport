@@ -7,7 +7,7 @@
     "agentport": "./dist/cli.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && node -e \"require('fs').cpSync('src/web/public', 'dist/web/public', {recursive: true})\"",
+    "build": "tsc -p tsconfig.json && node -e \"const fs=require('fs');fs.cpSync('src/web/public','dist/web/public',{recursive:true});fs.cpSync('personas','dist/personas',{recursive:true})\"",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
