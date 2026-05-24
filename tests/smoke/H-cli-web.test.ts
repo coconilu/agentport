@@ -18,7 +18,6 @@ describe("H. CLI / Web UI smoke", () => {
     const { stdout } = await exec(tsxBin, [cliPath, "--help"]);
     expect(stdout).toContain("scan");
     expect(stdout).toContain("port");
-    expect(stdout).toContain("hub");
     expect(stdout).toContain("diff");
   });
 

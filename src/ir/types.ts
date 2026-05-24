@@ -55,8 +55,6 @@ export interface SkillEntry {
   version?: string;
   isSymlink?: boolean;
   symlinkTarget?: string;
-  tags?: string[];
-  hubMatch?: { hubId: string; hubEntryId: string };
 }
 
 export interface CommandEntry {
