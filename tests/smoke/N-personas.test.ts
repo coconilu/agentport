@@ -14,7 +14,7 @@ describe("N. Built-in personas", () => {
   it("N1: loadPersonas returns at least 5 personas with required fields", () => {
     const personas = loadPersonas();
     const ids = personas.map((p) => p.id);
-    expect(ids).toEqual(expect.arrayContaining(["frontend", "backend", "fullstack", "pm", "qa"]));
+    expect(ids).toEqual(expect.arrayContaining(["frontend", "backend", "fullstack", "pm", "qa", "designer", "technical-writing"]));
     for (const p of personas) {
       expect(p.name).toBeTruthy();
       expect(p.description).toBeTruthy();
@@ -29,6 +29,17 @@ describe("N. Built-in personas", () => {
       for (const item of [...(r.skills ?? []), ...(r.agents ?? []), ...(r.commands ?? []), ...(r.mcp ?? [])]) {
         expect(item.rationale, `${p.id}:${item.id} missing rationale`).toBeTruthy();
         expect(item.rationale.length).toBeGreaterThan(10);
+      }
+    }
+  });
+
+  it("N2b: curated personas stay compact and include research sources", () => {
+    for (const p of loadPersonas()) {
+      const r = p.recommendations;
+      const items = [...(r.skills ?? []), ...(r.agents ?? []), ...(r.commands ?? []), ...(r.mcp ?? [])];
+      expect(items.length, `${p.id} has too many recommendations`).toBeLessThanOrEqual(16);
+      for (const item of items) {
+        expect(item.source, `${p.id}:${item.id} missing source`).toMatch(/^https?:\/\//);
       }
     }
   });

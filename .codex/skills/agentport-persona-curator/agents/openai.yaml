@@ -1,0 +1,7 @@
+interface:
+  display_name: "Agentport Persona Curator"
+  short_description: "Refresh curated role persona bundles"
+  default_prompt: "Use $agentport-persona-curator to refresh agentport personas, verify the UI, capture screenshots, and prepare a PR."
+
+policy:
+  allow_implicit_invocation: true

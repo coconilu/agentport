@@ -5,20 +5,38 @@
   "version": "0.1.0",
   "recommendations": {
     "skills": [
-      { "id": "frontend-design", "rationale": "Production-grade UI generation with non-generic aesthetics" },
-      { "id": "vercel-react-best-practices", "rationale": "Catches React/Next.js perf foot-guns" },
-      { "id": "component-scanner", "rationale": "Inventories existing components to avoid duplication" },
-      { "id": "scan-reviewer", "rationale": "Reviews generated code for reusability against existing UI primitives" }
+      { "id": "frontend-design", "rationale": "Production-grade UI generation with non-generic aesthetics", "source": "https://www.skillhub.club/skills/miethe-skillmeat-frontend-design" },
+      { "id": "vercel-react-best-practices", "rationale": "Catches React/Next.js perf foot-guns and server-component mistakes", "source": "https://agenticskills.io/" },
+      { "id": "component-scanner", "rationale": "Inventories existing components before creating another variant", "source": "https://www.turbodocx.com/blog/best-claude-code-skills-plugins-mcp-servers" },
+      { "id": "scan-reviewer", "rationale": "Reviews generated UI for reuse against existing primitives", "source": "https://mcp.directory/skills/engineering-skills" },
+      { "id": "ui-ux-pro-max", "rationale": "Adds UX patterns, palettes, layout systems, and design critique beyond basic code generation", "source": "https://www.reddit.com/r/ClaudeAI/comments/1smlpgc/what_claude_code_skillsmcps_actually_produce/" },
+      { "id": "web-design-guidelines", "rationale": "Applies concrete typography, motion, layout, and visual-detail checks", "source": "https://skillhub.club/skills?category=frontend" }
     ],
     "agents": [
-      { "id": "code-reviewer", "rationale": "Catches React anti-patterns and accessibility issues" }
+      { "id": "code-reviewer", "rationale": "Catches React anti-patterns and accessibility issues", "source": "https://www.promptspace.in/learn/best-claude-code-testing-skills" },
+      { "id": "accessibility-reviewer", "rationale": "Runs a focused pass for keyboard, contrast, semantics, and screen-reader regressions", "source": "https://skillhub.club/skills?category=frontend" }
     ],
     "mcp": [
       {
         "id": "playwright",
         "rationale": "Browser automation for visual regression + a11y checks",
+        "source": "https://discoveraiskills.com/",
         "transport": "stdio",
         "install": { "command": "npx", "args": ["-y", "@playwright/mcp@latest"] }
+      },
+      {
+        "id": "context7",
+        "rationale": "Fetches current framework/library docs before coding against fast-moving frontend APIs",
+        "source": "https://gurumood.com/en/resources/tutorials/claude-code-plugins-skills-and-top-mcp-servers",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@upstash/context7-mcp@latest"] }
+      },
+      {
+        "id": "21st-dev-magic",
+        "rationale": "Generates and refines polished UI components from a design-oriented component source",
+        "source": "https://mcp.harishgarg.com/use/21stdev-magic/mcp-server/with/claude-code",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@21st-dev/magic-mcp@latest"] }
       }
     ]
   }

@@ -166,9 +166,11 @@ main { max-width: 1200px; margin: 0 auto; }
 .persona-detail .pd-result { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 0.7rem 0.9rem; margin-top: 1rem; font-size: 0.85rem; }
 .persona-detail .pd-back {
   background: transparent; border: none; color: var(--muted); cursor: pointer;
-  font-size: 0.85rem; padding: 0; margin-bottom: 0.5rem;
+  font-size: 0.8rem; padding: 0.15rem 0; margin: 0 0 0.7rem;
+  display: inline-flex; align-items: center; width: fit-content;
+  font-weight: 500;
 }
-.persona-detail .pd-back:hover { color: var(--fg); }
+.persona-detail .pd-back:hover { color: var(--accent); }
 
 /* ===== Modal ===== */
 .modal-overlay {

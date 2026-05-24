@@ -1,0 +1,44 @@
+{
+  "id": "designer",
+  "name": "Designer",
+  "description": "Product and visual design: Figma handoff, design systems, UX polish, brand-aware UI.",
+  "version": "0.1.0",
+  "recommendations": {
+    "skills": [
+      { "id": "frontend-design", "rationale": "Creates distinctive, production-grade interfaces instead of generic generated layouts", "source": "https://www.skillhub.club/skills/miethe-skillmeat-frontend-design" },
+      { "id": "ui-ux-pro-max", "rationale": "Adds patterns, palettes, typography pairings, chart choices, and broader UX critique", "source": "https://www.reddit.com/r/ClaudeAI/comments/1smlpgc/what_claude_code_skillsmcps_actually_produce/" },
+      { "id": "interface-design", "rationale": "Forces clear visual choices before code so screens have a point of view", "source": "https://www.skillhub.club/skills/dammyjay93-interface-design?from=hot" },
+      { "id": "web-design-guidelines", "rationale": "Checks typography, spacing, motion, polish, and common UI quality rules", "source": "https://skillhub.club/skills?category=frontend" },
+      { "id": "ui-implementer", "rationale": "Turns Figma files, screenshots, and component references into implementation tasks", "source": "https://skillhub.club/skills?category=frontend" },
+      { "id": "design-system-auditor", "rationale": "Audits tokens, variants, light/dark modes, and component consistency before handoff", "source": "https://www.reddit.com/r/FigmaDesign/comments/1s9k16i/i_built_an_mcp_skill_for_generating_and_auditing/" },
+      { "id": "accessibility-audit", "rationale": "Checks contrast, focus, semantic roles, and reduced-motion behavior during design review", "source": "https://skillhub.club/skills?category=frontend" },
+      { "id": "brand-voice-ui-copy", "rationale": "Keeps microcopy, empty states, and labels aligned to the product voice", "source": "https://anyplugs.com/" }
+    ],
+    "agents": [
+      { "id": "design-reviewer", "rationale": "Runs a focused critique on hierarchy, rhythm, density, affordance, and visual consistency", "source": "https://claude-codex.fr/en/plugins/best-design/" },
+      { "id": "ux-researcher", "rationale": "Explores flows, edge cases, and user intent before committing to a screen design", "source": "https://www.reddit.com/r/FigmaDesign/comments/1td9hpm/claude_code_figma_mcp/" }
+    ],
+    "mcp": [
+      {
+        "id": "21st-dev-magic",
+        "rationale": "Provides design-oriented UI component generation and refinement from 21st.dev",
+        "source": "https://mcp.harishgarg.com/use/21stdev-magic/mcp-server/with/claude-code",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@21st-dev/magic-mcp@latest"] }
+      },
+      {
+        "id": "figma-dev-mode",
+        "rationale": "Exposes Figma structure, layout, styles, and annotations for accurate design-to-code handoff",
+        "source": "https://awesomeclaude.ai/how-to/use-figma-with-claude",
+        "transport": "stdio"
+      },
+      {
+        "id": "playwright",
+        "rationale": "Captures real browser screenshots so visual QA happens against rendered UI, not guesses",
+        "source": "https://www.reddit.com/r/ClaudeAI/comments/1t24gan/few_months_of_frontenddesign_uiuxpromaxskill/",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@playwright/mcp@latest"] }
+      }
+    ]
+  }
+}

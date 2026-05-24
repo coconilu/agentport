@@ -435,11 +435,10 @@ async function renderPersonaDetail(contentEl, id) {
   back.dataset.testid = "persona-back";
   back.textContent = "← All personas";
   back.addEventListener("click", () => { personaDetail = null; render(); });
-  contentEl.appendChild(back);
-
   const wrap = document.createElement("div");
   wrap.className = "persona-detail";
   wrap.dataset.testid = "persona-detail";
+  wrap.appendChild(back);
 
   const head = document.createElement("div");
   head.innerHTML =

@@ -5,22 +5,33 @@
   "version": "0.1.0",
   "recommendations": {
     "skills": [
-      { "id": "claude-api", "rationale": "Building services that call Claude API; covers prompt caching, tool use" },
-      { "id": "review-gen", "rationale": "Reviews generated code against existing modules to avoid duplication" },
-      { "id": "scan-index", "rationale": "Indexes existing exports/utilities before generating new ones" },
-      { "id": "security-review", "rationale": "Backend code is high-risk surface for auth/injection issues" }
+      { "id": "claude-api", "rationale": "Building services that call Claude API; covers prompt caching, tool use", "source": "https://anyplugs.com/" },
+      { "id": "review-gen", "rationale": "Reviews generated code against existing modules to avoid duplication", "source": "https://www.turbodocx.com/blog/best-claude-code-skills-plugins-mcp-servers" },
+      { "id": "scan-index", "rationale": "Indexes existing exports/utilities before generating new ones", "source": "https://mcp.directory/skills/engineering-skills" },
+      { "id": "security-review", "rationale": "Backend code is high-risk surface for auth/injection issues", "source": "https://mcp.directory/skills/engineering-skills" },
+      { "id": "api-contract-tester", "rationale": "Validates request/response contracts and catches integration drift early", "source": "https://www.promptspace.in/learn/best-claude-code-testing-skills" },
+      { "id": "full-stack-debugger", "rationale": "Traces failures across API, database, and UI boundaries during incident-style debugging", "source": "https://context7.com/ingpoc/skills" },
+      { "id": "database-migration-planner", "rationale": "Plans schema changes with rollback, data-shape, and compatibility checks", "source": "https://mcp.directory/skills/engineering-skills" }
     ],
     "agents": [
-      { "id": "code-reviewer", "rationale": "API design and error-handling review" },
-      { "id": "code-architect", "rationale": "Service boundaries and data-flow blueprints" }
+      { "id": "code-reviewer", "rationale": "API design and error-handling review", "source": "https://www.claudepluginhub.com/plugins/tundraray-node-workflow-backend" },
+      { "id": "code-architect", "rationale": "Service boundaries and data-flow blueprints", "source": "https://www.claudepluginhub.com/plugins/tundraray-node-workflow-backend" }
     ],
     "mcp": [
       {
         "id": "postgres",
         "rationale": "Inspect schemas and run safe queries during development",
+        "source": "https://dev.to/williamwangai/claude-code-skills-vs-mcp-servers-what-to-use-how-to-install-and-the-best-ones-in-2026-548k",
         "transport": "stdio",
         "install": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-postgres"] },
         "env": ["DATABASE_URL"]
+      },
+      {
+        "id": "context7",
+        "rationale": "Fetches current SDK and framework docs before implementing backend integrations",
+        "source": "https://gurumood.com/en/resources/tutorials/claude-code-plugins-skills-and-top-mcp-servers",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@upstash/context7-mcp@latest"] }
       }
     ]
   }
