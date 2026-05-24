@@ -5,6 +5,7 @@ import { readCodex, writeCodex } from "./adapters/codex.js";
 import type { ResolveOptions } from "./adapters/paths.js";
 import { applyHubTags } from "./hub/match.js";
 import { readCachedCatalog } from "./hub/cache.js";
+import { getCommunityCatalog } from "./hub/communityHub.js";
 import type { HubCatalog } from "./hub/types.js";
 
 // Read configs for a tool, then enrich skills with cached hub tags (if available).
@@ -32,9 +33,17 @@ function readRaw(tool: ToolId, opts: ResolveOptions): CanonicalConfig {
 
 function loadCachedCatalogs(home?: string): HubCatalog[] {
   const out: HubCatalog[] = [];
-  // Only known builtin hub id for now. When remote hubs are added, enumerate them here.
-  const cat = readCachedCatalog("community", { home, ttlMs: Number.MAX_SAFE_INTEGER });
-  if (cat) out.push(cat);
+  // Bundled hubs are always available synchronously — no cache file needed.
+  out.push(getCommunityCatalog());
+  // Future: enumerate cached remote-hub catalogs from ~/.agentport/hubs/
+  // and add them here. readCachedCatalog can override the bundled entry when
+  // a fresher remote-fetched version is present:
+  const remoteCached = readCachedCatalog("community", { home, ttlMs: Number.MAX_SAFE_INTEGER });
+  if (remoteCached && remoteCached.fetchedAt > out[0]!.fetchedAt) {
+    // Prefer cached if it's newer (would be the case if user ran `agentport hub sync`
+    // against a real remote hub that overwrote the community entry).
+    out[0] = remoteCached;
+  }
   return out;
 }
 

@@ -55,15 +55,21 @@ const ENTRIES: HubCatalogEntry[] = [
   { id: "architecture-critic", tags: ["architecture", "modernization", "review"] },
 ];
 
+// Bundled data is in-process — also expose a sync accessor so the sync read
+// pipeline can apply tags without first running `agentport hub sync`.
+export function getCommunityCatalog(): HubCatalog {
+  return {
+    hubId: "community",
+    name: "Community (bundled)",
+    fetchedAt: new Date().toISOString(),
+    entries: ENTRIES,
+  };
+}
+
 export const communityHub: SkillHub = {
   id: "community",
   name: "Community (bundled)",
   async fetchCatalog(): Promise<HubCatalog> {
-    return {
-      hubId: "community",
-      name: "Community (bundled)",
-      fetchedAt: new Date().toISOString(),
-      entries: ENTRIES,
-    };
+    return getCommunityCatalog();
   },
 };
