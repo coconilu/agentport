@@ -1,0 +1,43 @@
+{
+  "id": "technical-writing",
+  "name": "Technical Writing",
+  "description": "Developer documentation, tutorials, release notes, API references, and polished docs artifacts.",
+  "version": "0.1.0",
+  "recommendations": {
+    "skills": [
+      { "id": "write-docs", "rationale": "Classifies docs work and writes clear tutorials, how-tos, README content, and explanations", "source": "https://skillsmp.com/skills/smp4-claude-skills-write-docs-skill-md" },
+      { "id": "docs-manager", "rationale": "Structures repo documentation with clear ownership, audience separation, and cross-links", "source": "https://skillsmp.com/skills/diegosouzapw-awesome-omni-skill-skills-documentation-docs-manager-skill-md" },
+      { "id": "docs-specialist", "rationale": "Generates code-to-docs content, detects documentation drift, and applies repeatable templates", "source": "https://skillsmp.com/zh/skills/mwguerra-claude-code-plugins-docs-specialist-skills-docs-specialist-skill-md" },
+      { "id": "smart-docs", "rationale": "Builds architecture docs with project discovery, C4-style structure, and Mermaid diagrams", "source": "https://www.skillhub.club/skills/sopaco-deepwiki-rs-smart-docs" },
+      { "id": "docx", "rationale": "Creates, edits, redlines, and validates Word documents for polished deliverables", "source": "https://skills.sh/tfriedel/claude-office-skills/docx" },
+      { "id": "pdf", "rationale": "Extracts, reviews, and packages PDF content used in specs, reports, and documentation QA", "source": "https://fastmcp.me/Skills/Details/875/documents" },
+      { "id": "presentations", "rationale": "Turns technical narratives into slide decks for launches, reviews, and stakeholder education", "source": "https://anyplugs.com/" },
+      { "id": "document-converter", "rationale": "Converts DOCX, PDF, and Markdown in batches for docs migrations and publication workflows", "source": "https://www.skillhub.club/skills/benbrastmckie-document-converter" },
+      { "id": "scientific-documentation", "rationale": "Produces exhaustive research-grade project documentation with pedagogical depth", "source": "https://skills.sh/bbeierle12/skill-mcp-claude/scientific-documentation" },
+      { "id": "skill-builder", "rationale": "Documents and validates reusable agent skills with concise triggers and progressive disclosure", "source": "https://www.skillhub.club/skills/skill-builder" },
+      { "id": "tech-tutorial-writer", "rationale": "Turns implementation knowledge into readable tutorials and learning paths", "source": "https://skillsmp.com/skills/smp4-claude-skills-write-docs-skill-md" },
+      { "id": "claude-md-improver", "rationale": "Maintains agent-facing instructions such as CLAUDE.md and AGENTS.md as living docs", "source": "https://www.skillhub.club/skills/skill-builder" }
+    ],
+    "agents": [
+      { "id": "code-explorer", "rationale": "Reads unfamiliar codebases and extracts accurate concepts before drafting docs", "source": "https://skillsmp.com/skills/smp4-claude-skills-write-docs-skill-md" },
+      { "id": "doc-reviewer", "rationale": "Reviews docs for audience fit, accuracy, missing prerequisites, and stale examples", "source": "https://skillsmp.com/zh/skills/mwguerra-claude-code-plugins-docs-specialist-skills-docs-specialist-skill-md" }
+    ],
+    "mcp": [
+      {
+        "id": "github",
+        "rationale": "Reads issues, PRs, discussions, and release history while drafting docs and changelogs",
+        "source": "https://dev.to/williamwangai/claude-code-skills-vs-mcp-servers-what-to-use-how-to-install-and-the-best-ones-in-2026-548k",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-github"] },
+        "env": ["GITHUB_PERSONAL_ACCESS_TOKEN"]
+      },
+      {
+        "id": "filesystem",
+        "rationale": "Traverses local source, docs, examples, and generated artifacts during documentation passes",
+        "source": "https://gurumood.com/en/resources/tutorials/claude-code-plugins-skills-and-top-mcp-servers",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-filesystem"] }
+      }
+    ]
+  }
+}

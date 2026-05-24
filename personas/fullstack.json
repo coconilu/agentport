@@ -5,29 +5,50 @@
   "version": "0.1.0",
   "recommendations": {
     "skills": [
-      { "id": "frontend-design", "rationale": "UI generation for the client side" },
-      { "id": "vercel-react-best-practices", "rationale": "Perf and patterns for SSR/RSC frameworks" },
-      { "id": "claude-api", "rationale": "When the backend itself calls Claude APIs" },
-      { "id": "review-gen", "rationale": "Cross-layer review to keep client + server consistent" },
-      { "id": "scan-index", "rationale": "Reusability across both layers" },
-      { "id": "scan-reviewer", "rationale": "Catches duplicated logic between frontend and backend" }
+      { "id": "frontend-design", "rationale": "UI generation for the client side", "source": "https://www.skillhub.club/skills/miethe-skillmeat-frontend-design" },
+      { "id": "vercel-react-best-practices", "rationale": "Perf and patterns for SSR/RSC frameworks", "source": "https://agenticskills.io/" },
+      { "id": "claude-api", "rationale": "When the backend itself calls Claude APIs", "source": "https://anyplugs.com/" },
+      { "id": "review-gen", "rationale": "Cross-layer review to keep client + server consistent", "source": "https://www.turbodocx.com/blog/best-claude-code-skills-plugins-mcp-servers" },
+      { "id": "scan-index", "rationale": "Reusability across both layers", "source": "https://mcp.directory/skills/engineering-skills" },
+      { "id": "scan-reviewer", "rationale": "Catches duplicated logic between frontend and backend", "source": "https://mcp.directory/skills/engineering-skills" },
+      { "id": "feature-dev", "rationale": "Coordinates feature work across UI, API, persistence, and review handoff", "source": "https://www.turbodocx.com/blog/best-claude-code-skills-plugins-mcp-servers" },
+      { "id": "full-stack-debugger", "rationale": "Debugs errors by checking browser state, server logs, and data together", "source": "https://context7.com/ingpoc/skills" },
+      { "id": "api-contract-tester", "rationale": "Keeps frontend expectations and backend responses aligned", "source": "https://www.promptspace.in/learn/best-claude-code-testing-skills" },
+      { "id": "security-review", "rationale": "Adds auth, injection, data exposure, and dependency checks to cross-layer changes", "source": "https://mcp.directory/skills/engineering-skills" }
     ],
     "agents": [
-      { "id": "code-reviewer", "rationale": "Full-stack PR review" },
-      { "id": "code-architect", "rationale": "End-to-end feature design" }
+      { "id": "code-reviewer", "rationale": "Full-stack PR review", "source": "https://www.claudepluginhub.com/plugins/tundraray-node-workflow-backend" },
+      { "id": "code-architect", "rationale": "End-to-end feature design", "source": "https://www.claudepluginhub.com/plugins/tundraray-node-workflow-backend" }
     ],
     "mcp": [
       {
         "id": "playwright",
         "rationale": "E2E + visual + a11y testing",
+        "source": "https://discoveraiskills.com/",
         "transport": "stdio",
         "install": { "command": "npx", "args": ["-y", "@playwright/mcp@latest"] }
       },
       {
         "id": "filesystem",
         "rationale": "Cross-cutting file access for refactors that touch many layers",
+        "source": "https://gurumood.com/en/resources/tutorials/claude-code-plugins-skills-and-top-mcp-servers",
         "transport": "stdio",
         "install": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-filesystem"] }
+      },
+      {
+        "id": "context7",
+        "rationale": "Fetches current docs before using frontend and backend libraries together",
+        "source": "https://gurumood.com/en/resources/tutorials/claude-code-plugins-skills-and-top-mcp-servers",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@upstash/context7-mcp@latest"] }
+      },
+      {
+        "id": "postgres",
+        "rationale": "Lets the agent inspect and validate data behavior while wiring features end-to-end",
+        "source": "https://dev.to/williamwangai/claude-code-skills-vs-mcp-servers-what-to-use-how-to-install-and-the-best-ones-in-2026-548k",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-postgres"] },
+        "env": ["DATABASE_URL"]
       }
     ]
   }

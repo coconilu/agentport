@@ -5,20 +5,32 @@
   "version": "0.1.0",
   "recommendations": {
     "skills": [
-      { "id": "tech-tutorial-writer", "rationale": "Convert internal docs to readable guides" },
-      { "id": "oss-rebuild-coach", "rationale": "Decompose competitor products into learnable phases" },
-      { "id": "claude-md-improver", "rationale": "Maintain CLAUDE.md / AGENTS.md as living spec" }
+      { "id": "tech-tutorial-writer", "rationale": "Convert internal docs to readable guides", "source": "https://skillsmp.com/skills/smp4-claude-skills-write-docs-skill-md" },
+      { "id": "oss-rebuild-coach", "rationale": "Decompose competitor products into learnable phases", "source": "https://skillsmp.com/skills/diegosouzapw-awesome-omni-skill-skills-documentation-docs-manager-skill-md" },
+      { "id": "claude-md-improver", "rationale": "Maintain CLAUDE.md / AGENTS.md as living spec", "source": "https://www.skillhub.club/skills/skill-builder" },
+      { "id": "prd-writer", "rationale": "Turns fuzzy product intent into scoped requirements and acceptance criteria", "source": "https://agenticskills.io/" },
+      { "id": "release-notes", "rationale": "Summarizes shipped changes into customer-facing and internal release notes", "source": "https://skillsmp.com/skills/diegosouzapw-awesome-omni-skill-skills-documentation-docs-manager-skill-md" },
+      { "id": "stakeholder-update-writer", "rationale": "Creates concise weekly updates, decision logs, and launch status notes", "source": "https://anyplugs.com/" }
     ],
     "agents": [
-      { "id": "code-explorer", "rationale": "Read and summarize unfamiliar codebases for product context" }
+      { "id": "code-explorer", "rationale": "Read and summarize unfamiliar codebases for product context", "source": "https://skillsmp.com/skills/smp4-claude-skills-write-docs-skill-md" },
+      { "id": "project-manager", "rationale": "Breaks product work into milestones, owners, risks, and follow-up questions", "source": "https://www.reddit.com/r/mcp/comments/1ssm9xp/5_claude_code_agents_working_as_a_dev_team/" }
     ],
     "mcp": [
       {
         "id": "github",
         "rationale": "Triage issues, summarize discussions, draft release notes",
+        "source": "https://dev.to/williamwangai/claude-code-skills-vs-mcp-servers-what-to-use-how-to-install-and-the-best-ones-in-2026-548k",
         "transport": "stdio",
         "install": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-github"] },
         "env": ["GITHUB_PERSONAL_ACCESS_TOKEN"]
+      },
+      {
+        "id": "filesystem",
+        "rationale": "Reads local specs, notes, docs, and release artifacts when preparing product summaries",
+        "source": "https://gurumood.com/en/resources/tutorials/claude-code-plugins-skills-and-top-mcp-servers",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-filesystem"] }
       }
     ]
   }

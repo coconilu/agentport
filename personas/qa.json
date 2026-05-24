@@ -5,24 +5,39 @@
   "version": "0.1.0",
   "recommendations": {
     "skills": [
-      { "id": "scan-reviewer", "rationale": "Audit test coverage gaps against existing helpers" },
-      { "id": "security-review", "rationale": "Security regression checklist" }
+      { "id": "scan-reviewer", "rationale": "Audit test coverage gaps against existing helpers", "source": "https://mcp.directory/skills/engineering-skills" },
+      { "id": "security-review", "rationale": "Security regression checklist", "source": "https://mcp.directory/skills/engineering-skills" },
+      { "id": "browser-qa", "rationale": "Runs live-page smoke tests, interaction checks, screenshots, and accessibility passes", "source": "https://www.claudepluginhub.com/skills/usernametron-everything-claude-code/browser-qa" },
+      { "id": "api-contract-tester", "rationale": "Exercises API contracts and catches mismatched payloads before release", "source": "https://www.promptspace.in/learn/best-claude-code-testing-skills" },
+      { "id": "data-faker", "rationale": "Generates realistic fixtures and edge-case inputs for manual and automated tests", "source": "https://www.promptspace.in/learn/best-claude-code-testing-skills" },
+      { "id": "accessibility-audit", "rationale": "Checks keyboard navigation, semantics, focus order, and color contrast", "source": "https://skillhub.club/skills?category=frontend" },
+      { "id": "regression-test-planner", "rationale": "Turns bug fixes and risky changes into focused regression suites", "source": "https://claudemarketplaces.com/skills/category/testing" }
     ],
     "agents": [
-      { "id": "code-reviewer", "rationale": "Reviews test code for flakiness and false-positive patterns" }
+      { "id": "code-reviewer", "rationale": "Reviews test code for flakiness and false-positive patterns", "source": "https://www.promptspace.in/learn/best-claude-code-testing-skills" }
     ],
     "mcp": [
       {
         "id": "playwright",
         "rationale": "Primary tool: browser automation for E2E suites",
+        "source": "https://discoveraiskills.com/",
         "transport": "stdio",
         "install": { "command": "npx", "args": ["-y", "@playwright/mcp@latest"] }
       },
       {
         "id": "filesystem",
         "rationale": "Inspect test fixtures, snapshots, logs",
+        "source": "https://gurumood.com/en/resources/tutorials/claude-code-plugins-skills-and-top-mcp-servers",
         "transport": "stdio",
         "install": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-filesystem"] }
+      },
+      {
+        "id": "github",
+        "rationale": "Reads PRs, issues, and CI context when building release/regression test plans",
+        "source": "https://dev.to/williamwangai/claude-code-skills-vs-mcp-servers-what-to-use-how-to-install-and-the-best-ones-in-2026-548k",
+        "transport": "stdio",
+        "install": { "command": "npx", "args": ["-y", "@modelcontextprotocol/server-github"] },
+        "env": ["GITHUB_PERSONAL_ACCESS_TOKEN"]
       }
     ]
   }
