@@ -55,6 +55,32 @@ test("E4: clicking a card opens modal with detail sections", async ({ page }) =>
   await expect(modal.locator('section[data-section="body"]')).toContainText("Body text here");
 });
 
+test("E4a: resource cards use roomy 3-column layout", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto(fx.url);
+  const grid = page.locator(".cards").first();
+  const card = page.locator('[data-testid="card-agents:claude-code:code-reviewer"]').first();
+  await expect(card).toBeVisible();
+
+  const layout = await card.evaluate((el) => {
+    const gridEl = el.closest(".cards")!;
+    const title = el.querySelector(".title")!;
+    const badges = el.querySelector(".badge-row")!;
+    const desc = el.querySelector(".desc")!;
+    return {
+      columns: getComputedStyle(gridEl).gridTemplateColumns.split(" ").filter(Boolean).length,
+      titleBottom: title.getBoundingClientRect().bottom,
+      badgesTop: badges.getBoundingClientRect().top,
+      descClamp: getComputedStyle(desc).getPropertyValue("-webkit-line-clamp"),
+    };
+  });
+
+  await expect(grid).toBeVisible();
+  expect(layout.columns).toBe(3);
+  expect(layout.titleBottom).toBeLessThanOrEqual(layout.badgesTop);
+  expect(layout.descClamp).toBe("3");
+});
+
 test("E4b: modal closes on Escape, overlay click, and close button", async ({ page }) => {
   await page.goto(fx.url);
   const modal = page.locator('[data-testid="modal"]');

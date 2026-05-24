@@ -169,14 +169,20 @@ function mkCard(testId, title, badges, desc, onClick) {
   card.addEventListener("click", onClick);
   card.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(); } });
 
-  const row1 = document.createElement("div");
-  row1.className = "row1";
+  const header = document.createElement("div");
+  header.className = "card-header";
   const t = document.createElement("span");
   t.className = "title";
   t.textContent = title;
-  row1.appendChild(t);
-  for (const b of badges) row1.insertAdjacentHTML("beforeend", mkBadgeHtml(b));
-  card.appendChild(row1);
+  header.appendChild(t);
+  card.appendChild(header);
+
+  if (badges.length > 0) {
+    const badgeRow = document.createElement("div");
+    badgeRow.className = "badge-row";
+    for (const b of badges) badgeRow.insertAdjacentHTML("beforeend", mkBadgeHtml(b));
+    card.appendChild(badgeRow);
+  }
 
   if (desc) {
     const d = document.createElement("div");
