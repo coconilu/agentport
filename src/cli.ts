@@ -4,6 +4,7 @@ import { scan } from "./scan.js";
 import { sync } from "./sync.js";
 import { diffTools, renderDiff } from "./diff.js";
 import { loadPersonas, loadPersona, matchPersona, planInstall, applyInstall } from "./personas/index.js";
+import * as devicesync from "./devicesync/index.js";
 import type { ToolId } from "./ir/types.js";
 
 const HELP = `agentport — port and manage AI coding agent configs
@@ -16,6 +17,10 @@ Usage:
   agentport persona show <id>                 Show a persona with installed/missing status
   agentport persona install <id> --target <tool> [--dry-run]
                                               Install recommendations into <tool>
+  agentport sync init <git-url>               Initialize cross-device sync against a git remote
+  agentport sync push --passphrase <p>        Encrypt + push the local IR bundle
+  agentport sync pull --passphrase <p>        Pull + decrypt + show diff (does not apply yet)
+  agentport sync status                       Show local/remote divergence
   agentport --help                            Show this help
 
 Tools: claude-code | opencode | codex
@@ -72,7 +77,81 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
     return personaCmd(argv.slice(1));
   }
 
+  if (cmd === "sync") {
+    return syncCmd(argv.slice(1));
+  }
+
   process.stderr.write(`unknown command: ${cmd}\n${HELP}`);
+  return 2;
+}
+
+function syncCmd(args: string[]): number {
+  const sub = args[0];
+  if (sub === "init") {
+    const url = args[1];
+    if (!url) {
+      process.stderr.write("usage: agentport sync init <git-url>\n");
+      return 2;
+    }
+    try {
+      const { repoDir, configFile } = devicesync.init({ remote: url });
+      process.stdout.write(`initialized sync repo at ${repoDir}\nwrote config to ${configFile}\n`);
+      return 0;
+    } catch (e) {
+      process.stderr.write(`error: ${e instanceof Error ? e.message : String(e)}\n`);
+      return 1;
+    }
+  }
+  if (sub === "push" || sub === "pull") {
+    const { values } = parseArgs({
+      args: args.slice(1),
+      options: { passphrase: { type: "string" } },
+      strict: false,
+    });
+    if (typeof values.passphrase !== "string" || !values.passphrase) {
+      process.stderr.write("error: --passphrase <p> is required\n");
+      return 2;
+    }
+    try {
+      if (sub === "push") {
+        const r = devicesync.push({ passphrase: values.passphrase });
+        for (const w of r.warnings) process.stderr.write(`warning: ${w}\n`);
+        process.stdout.write(r.pushed ? `pushed bundle: ${r.bundleFile}\n` : `no changes to push\n`);
+        return 0;
+      } else {
+        const r = devicesync.pull({ passphrase: values.passphrase });
+        process.stdout.write(`pulled bundle from ${r.bundle.hostname ?? "(unknown host)"} at ${r.bundle.generatedAt}\n`);
+        if (r.diff.changedTools.length === 0) {
+          process.stdout.write("no differences vs local\n");
+        } else {
+          process.stdout.write(`changed tools: ${r.diff.changedTools.join(", ")}\n`);
+          for (const t of r.diff.changedTools) {
+            const d = r.diff.perTool[t];
+            process.stdout.write(`  ${t}: mcp +${d.mcp.added.length}/-${d.mcp.removed.length}/~${d.mcp.changed.length}, skills +${d.skills.added}/-${d.skills.removed}, agents +${d.agents.added}/-${d.agents.removed}\n`);
+          }
+        }
+        process.stdout.write("(apply step not yet wired — see status for details)\n");
+        return 0;
+      }
+    } catch (e) {
+      process.stderr.write(`error: ${e instanceof Error ? e.message : String(e)}\n`);
+      return 1;
+    }
+  }
+  if (sub === "status") {
+    const s = devicesync.status();
+    if (!s.configured) {
+      process.stdout.write("not configured (run `agentport sync init <git-url>`)\n");
+      return 0;
+    }
+    process.stdout.write(`remote: ${s.remote}\n`);
+    process.stdout.write(`bundle on remote: ${s.bundlePresentRemote ? "yes" : "no"}\n`);
+    process.stdout.write(`local repo dirty: ${s.dirty ? "yes" : "no"}\n`);
+    if (s.ahead) process.stdout.write(`ahead of ${s.ahead}\n`);
+    if (s.behind) process.stdout.write(`behind ${s.behind}\n`);
+    return 0;
+  }
+  process.stderr.write(`unknown sync subcommand: ${sub ?? "(none)"}\n`);
   return 2;
 }
 
