@@ -104,6 +104,24 @@ main { max-width: 1200px; margin: 0 auto; }
 .badge.plugin { background: #e0e7ff; color: #4338ca; }
 .badge.symlink { background: #ede9fe; color: #6d28d9; }
 .badge.transport { background: #f1f5f9; color: #475569; }
+.badge.tag { background: #ecfeff; color: #0e7490; text-transform: lowercase; letter-spacing: 0; font-weight: 500; }
+
+.tag-filter {
+  display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center;
+  margin: 0.5rem 0 1rem; padding: 0.6rem 0.8rem;
+  background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+}
+.tag-filter .tf-label { color: var(--muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; margin-right: 0.3rem; }
+.tag-filter .tf-chip {
+  font-size: 0.75rem; padding: 2px 8px; border-radius: 999px; cursor: pointer;
+  background: var(--bg); border: 1px solid var(--border); color: var(--fg-soft);
+  font-family: ui-monospace, monospace;
+}
+.tag-filter .tf-chip:hover { border-color: var(--accent); color: var(--accent); }
+.tag-filter .tf-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+.tag-filter .tf-chip .tf-count { opacity: 0.6; margin-left: 4px; }
+.tag-filter .tf-clear { font-size: 0.75rem; cursor: pointer; color: var(--muted); margin-left: auto; background: transparent; border: none; }
+.tag-filter .tf-clear:hover { color: var(--fg); text-decoration: underline; }
 
 .empty { color: var(--mute); font-style: italic; padding: 0.6rem; background: var(--card); border: 1px dashed var(--border); border-radius: 8px; }
 

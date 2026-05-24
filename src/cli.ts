@@ -3,6 +3,7 @@ import { parseArgs } from "node:util";
 import { scan } from "./scan.js";
 import { sync } from "./sync.js";
 import { diffTools, renderDiff } from "./diff.js";
+import { loadCatalogs, BUILTIN_HUBS } from "./hub/index.js";
 import { loadPersonas, loadPersona, matchPersona, planInstall, applyInstall } from "./personas/index.js";
 import * as devicesync from "./devicesync/index.js";
 import type { ToolId } from "./ir/types.js";
@@ -13,6 +14,8 @@ Usage:
   agentport scan                              List detected tools (claude-code / opencode / codex)
   agentport port --from <tool> --to <tool>    Migrate config between tools
   agentport diff --from <tool> --to <tool>    Show MCP-level diff between two tools
+  agentport hub list                          List configured skill hubs and cached state
+  agentport hub sync [--hub <id>]             Refresh hub catalog cache
   agentport persona list                      List built-in role personas
   agentport persona show <id>                 Show a persona with installed/missing status
   agentport persona install <id> --target <tool> [--dry-run]
@@ -71,6 +74,10 @@ export async function main(argv: string[] = process.argv.slice(2)): Promise<numb
       process.stdout.write(renderDiff(lines) + "\n");
       return 0;
     }
+  }
+
+  if (cmd === "hub") {
+    return await hubCmd(argv.slice(1));
   }
 
   if (cmd === "persona") {
@@ -249,6 +256,41 @@ function printPlan(plan: { willInstall: Array<{ kind: string; id: string; into: 
     process.stdout.write("not auto-installable:\n");
     for (const w of plan.unsupported) process.stdout.write(`  ! ${w.kind} ${w.id} — ${w.reason}\n`);
   }
+}
+
+async function hubCmd(args: string[]): Promise<number> {
+  const sub = args[0];
+  if (sub === "list") {
+    const catalogs = await loadCatalogs({ refresh: false });
+    for (const hub of BUILTIN_HUBS) {
+      const cat = catalogs.find((c) => c.hubId === hub.id);
+      const status = cat ? `cached (${cat.entries.length} entries, fetched ${cat.fetchedAt})` : "no cache";
+      process.stdout.write(`${hub.id}\t${hub.name}\t${status}\n`);
+    }
+    return 0;
+  }
+  if (sub === "sync") {
+    const { values } = parseArgs({
+      args: args.slice(1),
+      options: { hub: { type: "string" } },
+      strict: false,
+    });
+    const targetHub = values.hub;
+    const catalogs = await loadCatalogs({ refresh: true });
+    let count = 0;
+    for (const cat of catalogs) {
+      if (targetHub && cat.hubId !== targetHub) continue;
+      process.stdout.write(`refreshed ${cat.hubId}: ${cat.entries.length} entries\n`);
+      count++;
+    }
+    if (targetHub && count === 0) {
+      process.stderr.write(`error: hub '${targetHub}' not found\n`);
+      return 2;
+    }
+    return 0;
+  }
+  process.stderr.write(`unknown hub subcommand: ${sub ?? "(none)"}\nUsage: agentport hub list | agentport hub sync [--hub <id>]\n`);
+  return 2;
 }
 
 const isDirect =
